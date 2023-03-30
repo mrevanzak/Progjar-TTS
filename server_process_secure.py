@@ -1,8 +1,8 @@
-import socket
-import ssl
 import os
-import multiprocessing
+import socket
 import threading
+import multiprocessing
+import ssl
 
 from http import HttpServer
 httpserver = HttpServer()
@@ -58,15 +58,19 @@ class Server(multiprocessing.Process):
 		multiprocessing.Process.__init__(self)
 
 	def run(self):
-		self.my_socket.bind(('0.0.0.0', 8889))
+		self.my_socket.bind(('0.0.0.0', 8443))
 		self.my_socket.listen(1)
 		while True:
 			self.connection, self.client_address = self.my_socket.accept()
-			# logging.warning("connection from {}".format(self.client_address))
+			try:
+				self.secure_connection = self.context.wrap_socket(self.connection, server_side=True)
+				# logging.warning("connection from {}".format(self.client_address))
+				clt = ProcessTheClient(self.secure_connection, self.client_address)
+				clt.start()
+				self.the_clients.append(clt)
+			except ssl.SSLError as essl:
+				print(str(essl))
 
-			clt = ProcessTheClient(self.connection, self.client_address)
-			clt.start()
-			self.the_clients.append(clt)
 
 
 
@@ -76,3 +80,4 @@ def main():
 
 if __name__=="__main__":
 	main()
+
