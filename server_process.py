@@ -1,5 +1,7 @@
 import socket
+import multiprocessing
 import threading
+
 from http import HttpServer
 httpserver = HttpServer()
 
@@ -39,12 +41,12 @@ class ProcessTheClient(threading.Thread):
 
 
 
-class Server(threading.Thread):
+class Server(multiprocessing.Process):
 	def __init__(self):
 		self.the_clients = []
 		self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		threading.Thread.__init__(self)
+		multiprocessing.Process.__init__(self)
 
 	def run(self):
 		self.my_socket.bind(('0.0.0.0', 8889))
@@ -65,4 +67,3 @@ def main():
 
 if __name__=="__main__":
 	main()
-
